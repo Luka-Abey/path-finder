@@ -71,7 +71,7 @@ export default class BFS extends React.Component {
                 const { x, y } = this.hexToPixel(this.Hex(q-p, r))
                 if((x> hexWidth/2 && x < canvasWidth - hexWidth/2) && (y > hexHeight/2 && y < canvasHeight - hexHeight/2)){
                     this.drawHex(this.canvasHex, this.Point(x,y));
-                    this.drawHexCoords(this.canvasHex, this.Point(x, y), this.Hex(q-p, r));
+                    this.drawHexCoords(this.canvasHex, this.Point(x, y), this.Hex(q-p, r, -q - r));
                 }
             }
         }
@@ -85,7 +85,7 @@ export default class BFS extends React.Component {
                 const { x, y } = this.hexToPixel(this.Hex(q+n, r));
                 if((x>hexWidth/2 && x < canvasWidth - hexWidth/2) && (y > hexHeight/2 && y<canvasHeight - hexHeight/2)){
                     this.drawHex(this.canvasHex, this.Point(x,y));
-                    this.drawHexCoords(this.canvasHex, this.Point(x,y), this.Hex(q+n, r));
+                    this.drawHexCoords(this.canvasHex, this.Point(x,y), this.Hex(q+n, r, -q -r));
                 }
             }
         }
@@ -115,6 +115,7 @@ export default class BFS extends React.Component {
         const ctx = canvasID.getContext("2d");
         ctx.fillText(h.q, center.x-10, center.y);
         ctx.fillText(h.r, center.x+7, center.y);
+        ctx.fillText(h.s, center.x-12, center.y);
     }
 
     getHexParameters(){
