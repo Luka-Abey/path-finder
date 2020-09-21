@@ -2,6 +2,14 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './BFS.css';
 
+var DUMMY_OBSTACLES = ['{"q":4, "r":-2, "s":-2}', '{"q":4, "r":-1, "s":-3}', '{"q":4, "r":0, "s":-4}', '{"q":4, "r":1, "s":-5}', '{"q":3, "r":2, "s":-2}',
+'{"q":8, "r":-9, "s":1}', '{"q":9, "r":-9, "s":0}', '{"q":10, "r":-9, "s":-1}', '{"q":11, "r":-9, "s":-2}', '{"q":12, "r":-9, "s":-3}',
+'{"q":9, "r":3, "s":-12}', '{"q":9, "r":4, "s":-13}', '{"q":8, "r":5, "s":-13}', '{"q":8, "r":6, "s":-14}', '{"q":7, "r":7, "s":-14}',
+'{"q":-5, "r":6, "s":-1}', '{"q":-5, "r":5, "s":0}', '{"q":-4, "r":4, "s":0}', '{"q":-3, "r":3, "s":0}', '{"q":-2, "r":-1, "s":3}',
+'{"q":-14, "r":6, "s":8}', '{"q":-14, "r":7, "s":7}', '{"q":-15, "r":8, "s":7}', '{"q":-15, "r":9, "s":6}', '{"q":-14, "r":9, "s":5}',
+'{"q":-8, "r":-6, "s":14}', '{"q":-7, "r":-7, "s":14}', '{"q":-7, "r":-8, "s":15}', '{"q":-6, "r":-9, "s":15}', '{"q":-5, "r":-9, "s":5}',
+'{"q":-7, "r":-4, "s":11}', '{"q":-6, "r":-2, "s":8}', '{"q":-6, "r":-1, "s":7}', '{"q":-6, "r":0, "s":6}', '{"q":-6, "r":1, "s":5}']
+
 export default class BFS extends React.Component {
     constructor(props) {
         super(props);
@@ -41,17 +49,21 @@ export default class BFS extends React.Component {
             const ctx = this.canvasInteraction.getContext("2d");
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             let currentDistanceLine = nextState.currentDistanceLine;
-            for(let i = 0; i<=currentDistanceLine.length -1; i++){
+            for(let i = 0; i<=currentDistanceLine.length - 2; i++){
                 if(i==0){
-                    this.drawHex(this.canvasInteraction, this.Point(currentDistanceLine[i].x, currentDistanceLine[i].y), 
-                    "black", 1, "blue");
+                    this.drawHex(this.canvasInteraction, this.Point(currentDistanceLine[i].x, currentDistanceLine[i].y), 1,
+                    "black", "blue");
                 }
                 else {
-                    this.drawHex(this.canvasInteraction, this.Point(currentDistanceLine[i].x, currentDistanceLine[i].y), "black", 1, "grey");
+                    this.drawHex(this.canvasInteraction, this.Point(currentDistanceLine[i].x, currentDistanceLine[i].y), 1, "black", "grey");
                 }
             }
+            nextState.obstacles.map((l) => {
+                const { q,r,s,x,y } = JSON.parse(l);
+                this.drawHex(this.canvasInteraction, this.Point(x,y), 1, "black", "black");
+            })
             // this.drawNeighbours(this.Hex(q,r,s));
-            this.drawHex(this.canvasInteraction, this.Point(x, y), "lime", 2);
+            this.drawHex(this.canvasInteraction, this.Point(x, y), 1, "black", "lime");
             return true;
         }
         return false;
@@ -69,12 +81,12 @@ export default class BFS extends React.Component {
         return { x: x, y: y}
     }
 
-    drawHex(canvasID, center, lineColor, width, fillColor) {
+    drawHex(canvasID, center, lineWidth, lineColor, fillColor) {
         for (let i = 0; i <=5; i++){
             let start = this.getHexCornerCoord(center, i);
             let end = this.getHexCornerCoord(center, i + 1);
             this.fillHex(canvasID, center, fillColor);
-            this.drawLine(canvasID, start, end, lineColor, width);
+            this.drawLine(canvasID, start, end, lineWidth, lineColor);
         }
     }
 
@@ -128,12 +140,12 @@ export default class BFS extends React.Component {
         return {q: q, r: r, s:s};        
     }
 
-    drawLine(canvasID, start, end, color, width){
+    drawLine(canvasID, start, end, lineWidth, lineColor){
         const ctx = canvasID.getContext("2d");
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = lineWidth;
         ctx.lineTo(end.x, end.y);
         ctx.stroke();
         ctx.closePath();
