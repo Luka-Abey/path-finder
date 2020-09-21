@@ -6,9 +6,11 @@ export default class BFS extends React.Component {
     constructor(props) {
         super(props);
 
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+
         this.state = {
             hexSize: 20,
-            hexOrigin: { x: 300, y: 300 }
+            hexOrigin: { x: 400, y: 300 }
         }
     }
 
@@ -24,6 +26,9 @@ export default class BFS extends React.Component {
         const { canvasWidth, canvasHeight } = this.state.canvasSize;
         this.canvasHex.width = canvasWidth;
         this.canvasHex.height = canvasHeight;
+        this.canvasCoordinates.width = canvasWidth;
+        this.canvasCoordinates.height = canvasHeight;
+        this.getCanvasPosition(this.canvasCoordinates);
         this.drawHexes();
     }
 
@@ -93,8 +98,8 @@ export default class BFS extends React.Component {
         return this.Point(x, y);
     }
 
-    Hex(q,r){
-        return {q: q, r: r};        
+    Hex(q,r, s){
+        return {q: q, r: r, s:s};        
     }
 
     drawLine(canvasID, start, end){
@@ -120,10 +125,60 @@ export default class BFS extends React.Component {
         return { hexWidth, hexHeight, vertDist, horizDist }
     }
 
+    handleMouseMove(e){
+        const { left, right, top, bottom } = this.state.canvasPosition;
+        console.log(e.pageX, e.pageY)
+        let offsetX = e.pageX - left;
+        let offsetY = e.pageY - top;
+        const { q, r, s } = this.cubeRound(this.pixelToHex(this.Point(offsetX, offsetY)));
+        const { x, y } = this.hexToPixel(this.Hex(q, r,s));
+        this.drawHex(this.canvasCoordinates, this.Point(x,y), "green", 2);
+        this.setState({
+            currentHex: { q,r,s,x,y }
+        })
+    }
+
+    getCanvasPosition(canvasID){
+        let rect = canvasID.getBoundingClientRect();
+        this.setState({
+            canvasPosition: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }
+        })
+    }
+
+    pixelToHex(p){
+        let size = this.state.hexSize;
+        let origin = this.state.hexOrigin;
+        let q = ((p.x - origin.x) * Math.sqrt(3)/3 - (p.y - origin.y)/3) /size;
+        let r = (p.y - origin.y) * 2/3 /size;
+        return this.Hex(q, r, -q - r);
+    }
+
+    cubeRound(cube){
+        var rx = Math.round(cube.q);
+        var ry = Math.round(cube.r);
+        var rz = Math.round(cube.s);
+
+        var x_diff = Math.abs(rx - cube.q)
+        var y_diff = Math.abs(ry - cube.r)
+        var z_diff = Math.abs(rz - cube.s)
+
+        if(x_diff > y_diff && x_diff > z_diff){
+            rx = -ry-rz
+        }
+        else if(y_diff > z_diff) {
+            ry = -rx-rz
+        }
+        else{
+            rz = -rx-ry
+        }
+        return this.Hex(rx, ry, rz);
+    }
+
     render(){
         return (
             <div className="BFS">
                 <canvas ref = { canvasHex => this.canvasHex = canvasHex}></canvas>
+                <canvas ref = { canvasCoordinates => this.canvasCoordinates = canvasCoordinates} onMouseMove = {this.handleMouseMove}></canvas>
             </div>
         )
     }
