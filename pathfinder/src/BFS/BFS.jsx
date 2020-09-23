@@ -20,7 +20,11 @@ export default class BFS extends React.Component {
             hexSize: 20,
             hexOrigin: { x: 400, y: 300 },
             currentHex: { q: 0, r: 0, s: 0, x: 0, y: 0 },
-            obstacles: []
+            obstacles: DUMMY_OBSTACLES, 
+            playerPosition: { q:0,r:0,s:0 },
+            cameFrom: {},
+            hexPath: [],
+            path: []
         }
     }
 
@@ -38,8 +42,11 @@ export default class BFS extends React.Component {
         this.canvasHex.height = canvasHeight;
         this.canvasInteraction.width = canvasWidth;
         this.canvasInteraction.height = canvasHeight;
+        this.canvasView.width = canvasWidth;
+        this.canvasView.height = canvasHeight;
         this.getCanvasPosition(this.canvasInteraction);
         this.drawHexes();
+        this.drawObstacles();
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -295,21 +302,13 @@ export default class BFS extends React.Component {
     }
 
     handleClick(){
-        this.addObstacles();
     }
 
-    addObstacles(){
-        let obstacles = this.state.obstacles;
-        if(!obstacles.includes(JSON.stringify(this.state.currentHex))){
-            obstacles = [].concat(obstacles, JSON.stringify(this.state.currentHex));
-        }
-        else {
-            obstacles.map((l,i) => {
-                obstacles = obstacles.slice(0, i).concat(obstacles.slice(i+1));
-            })
-        }
-        this.setState({
-            obstacles : obstacles
+    drawObstacles(){
+        this.state.obstacles.map((l)=> {
+            const { q, r, s } = JSON.parse(l);
+            const { x, y } = this.hexToPixel(this.Hex(q,r,s));
+            this.drawHex(this.canvasHex, this.Point(x,y), 1, "black", "black")
         })
     }
 
@@ -318,6 +317,7 @@ export default class BFS extends React.Component {
             <div className="BFS">
                 <canvas ref = { canvasHex => this.canvasHex = canvasHex }></canvas>
                 <canvas ref = { canvasCoordinates => this.canvasCoordinates = canvasCoordinates }></canvas>
+                <canvas ref = { canvasView => this.canvasView = canvasView }></canvas>
                 <canvas ref = { canvasInteraction => this.canvasInteraction = canvasInteraction }
                 onMouseMove = {this.handleMouseMove}
                 onClick={this.handleClick}></canvas>
